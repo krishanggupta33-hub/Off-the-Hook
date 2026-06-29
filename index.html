@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Off The Hook- Tron Edition</title>
+    <title>OFF THE HOOK - Tron Edition</title>
     <style>
         body {
             margin: 0;
@@ -55,6 +55,7 @@
             box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
             background-color: #000000;
             touch-action: none; 
+            image-rendering: pixelated;
         }
         .controls {
             margin-top: 15px;
@@ -97,7 +98,7 @@ bgMusic.volume = 0.4;
 
 window.addEventListener("mousedown", () => {
     if (bgMusic.paused) {
-        bgMusic.play().catch(e => console.log(e));
+        bgMusic.play().catch(() => {});
     }
 }, { once: true });
 
@@ -106,7 +107,7 @@ let currentLevel = 0;
 let particles = [];
 let levels = [];
 let bestTimes = JSON.parse(localStorage.getItem('neonTetherBestTimes')) || {};
-
+let gameComplete = false;
 let shakeMagnitude = 0;
 let shakeDuration = 0;
 
@@ -126,7 +127,7 @@ function triggerShake(magnitude, duration) {
 
 skipBtn.addEventListener("click", () => {
     if (currentLevel >= levels.length - 1) {
-        loadLevel(0);
+        gameComplete = true;
     } else {
         loadLevel(currentLevel + 1);
     }
@@ -160,6 +161,11 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mousedown", (e) => {
     e.preventDefault(); 
+    if (gameComplete) {
+        gameComplete = false;
+        loadLevel(0);
+        return;
+    }
     if (e.button === 0) {
         mouse.isDown = true;
         attemptGrapple();
@@ -187,7 +193,7 @@ function spawnParticles(x, y, color, count) {
 }
 
 function attemptGrapple() {
-    if (levels.length === 0) return;
+    if (levels.length === 0 || gameComplete) return;
     const activeLevel = levels[currentLevel];
     let activePlatforms = [...activeLevel.platforms];
     if (activeLevel.movingPlatforms) {
@@ -215,8 +221,8 @@ function attemptGrapple() {
 
 function loadLevel(index) {
     if (index >= levels.length) {
-        alert("System Overridden. Escape Successful.");
-        index = 0;
+        gameComplete = true;
+        return;
     }
     currentLevel = index;
     const levelData = levels[currentLevel];
@@ -244,13 +250,32 @@ async function initGame() {
         levels = await response.json();
         loadLevel(0);
         update();
-    } catch (error) {
-        console.error(error);
-    }
+    } catch (error) {}
 }
 
 function update() {
     if (levels.length === 0) {
+        requestAnimationFrame(update);
+        return;
+    }
+
+    if (gameComplete) {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#00e5ff";
+        ctx.font = "bold 48px Consolas";
+        ctx.textAlign = "center";
+        ctx.fillText("SYSTEM OVERRIDDEN", canvas.width / 2, canvas.height / 2 - 20);
+        
+        ctx.fillStyle = "#ff5500";
+        ctx.font = "24px Consolas";
+        ctx.fillText("ESCAPE SUCCESSFUL", canvas.width / 2, canvas.height / 2 + 25);
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "16px Consolas";
+        ctx.fillText("Click anywhere to restart", canvas.width / 2, canvas.height / 2 + 80);
+        
         requestAnimationFrame(update);
         return;
     }

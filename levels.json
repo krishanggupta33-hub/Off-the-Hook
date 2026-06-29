@@ -53,10 +53,9 @@
         "spawn": { "x": 50, "y": 400 },
         "goal": { "x": 820, "y": 410, "width": 40, "height": 40 },
         "platforms": [
-            { "x": 0, "y": 450, "width": 200, "height": 50 },
-            { "x": 400, "y": 300, "width": 50, "height": 200 },
-            { "x": 400, "y": 100, "width": 50, "height": 50 },
-            { "x": 700, "y": 450, "width": 200, "height": 50 }
+            { "x": 0, "y": 450, "width": 150, "height": 50 },
+            { "x": 380, "y": 100, "width": 140, "height": 100 },
+            { "x": 750, "y": 450, "width": 150, "height": 50 }
         ]
     },
     {
