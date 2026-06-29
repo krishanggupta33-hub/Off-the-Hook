@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Tether</title>
+    <title> Off The Hook- Tron Edition</title>
     <style>
         body {
             margin: 0;
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #050505;
+            color: #e0e0e0;
             font-family: 'Consolas', monospace;
             display: flex;
             flex-direction: column;
@@ -29,11 +29,11 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        .highlight { color: #38bdf8; font-weight: bold; }
+        .highlight { color: #00e5ff; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
         .skip-btn {
-            background-color: #f43f5e;
-            color: #fff;
-            border: none;
+            background-color: #ff5500;
+            color: #000;
+            border: 2px solid #ff5500;
             padding: 5px 15px;
             font-family: 'Consolas', monospace;
             font-weight: bold;
@@ -41,24 +41,28 @@
             cursor: pointer;
             border-radius: 4px;
             text-transform: uppercase;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(255, 85, 0, 0.5);
         }
         .skip-btn:hover {
-            background-color: #fb7185;
+            background-color: #000;
+            color: #ff5500;
+            box-shadow: 0 0 20px rgba(255, 85, 0, 0.8);
         }
         canvas {
-            border: 2px solid #334155;
+            border: 2px solid #00e5ff;
             border-radius: 4px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-            background-color: #0b0f19;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            background-color: #000000;
             touch-action: none; 
         }
         .controls {
             margin-top: 15px;
             font-size: 0.9rem;
-            color: #64748b;
+            color: #00e5ff;
             text-align: center;
             line-height: 1.6;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -87,9 +91,9 @@ const skipBtn = document.getElementById("skipBtn");
 const bikeImg = new Image();
 bikeImg.src = 'bike.png.png';
 
-const bgMusic = new Audio('music.mp3.mp3');
+const bgMusic = new Audio('music.mp3');
 bgMusic.loop = true;
-bgMusic.volume = 0.5;
+bgMusic.volume = 0.4;
 
 window.addEventListener("mousedown", () => {
     if (bgMusic.paused) {
@@ -110,7 +114,7 @@ const keys = { a: false, d: false, space: false };
 const mouse = { x: 0, y: 0, isDown: false };
 
 const player = {
-    x: 50, y: 400, vx: 0, vy: 0, width: 30, height: 20,
+    x: 50, y: 400, vx: 0, vy: 0, width: 45, height: 25,
     speed: 0.6, maxSpeed: 7, friction: 0.85, gravity: 0.45, jumpForce: 12,
     grounded: false, isGrappling: false, anchorX: 0, anchorY: 0, ropeLength: 0, swingAccel: 0.3
 };
@@ -137,7 +141,7 @@ window.addEventListener("keydown", (e) => {
             player.isGrappling = false;
             player.vy -= player.jumpForce * 0.6;
             triggerShake(4, 5); 
-            spawnParticles(player.x + 15, player.y + 10, "#ffffff", 8); 
+            spawnParticles(player.x + player.width/2, player.y + player.height/2, "#00e5ff", 8); 
         }
     }
 });
@@ -203,7 +207,7 @@ function attemptGrapple() {
             player.ropeLength = Math.sqrt(dx * dx + dy * dy);
             
             triggerShake(2, 3);
-            spawnParticles(mouse.x, mouse.y, "#38bdf8", 10);
+            spawnParticles(mouse.x, mouse.y, "#00e5ff", 10);
             return;
         }
     }
@@ -211,7 +215,7 @@ function attemptGrapple() {
 
 function loadLevel(index) {
     if (index >= levels.length) {
-        alert("Speedrun Complete!");
+        alert("System Overridden. Escape Successful.");
         index = 0;
     }
     currentLevel = index;
@@ -341,7 +345,7 @@ function update() {
                 
                 if (!previouslyGrounded && player.vy > 5) {
                     triggerShake(4, 5); 
-                    spawnParticles(player.x + 15, player.y + 20, "#cbd5e1", 8);
+                    spawnParticles(player.x + player.width/2, player.y + player.height, "#ff5500", 8);
                 }
                 
                 player.vy = 0;
@@ -358,7 +362,7 @@ function update() {
     if (keys.space && player.grounded && !player.isGrappling) {
         player.vy = -player.jumpForce;
         player.grounded = false;
-        spawnParticles(player.x + 15, player.y + 20, "#cbd5e1", 5);
+        spawnParticles(player.x + player.width/2, player.y + player.height, "#ff5500", 5);
     }
 
     if (player.y > canvas.height + 200) {
@@ -377,6 +381,13 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    ctx.strokeStyle = "rgba(0, 229, 255, 0.05)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i=0; i<canvas.width; i+=40) { ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); }
+    for(let i=0; i<canvas.height; i+=40) { ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); }
+    ctx.stroke();
+
     for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
         p.x += p.vx;
@@ -388,46 +399,64 @@ function update() {
         }
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
         ctx.fillRect(p.x, p.y, 4, 4);
+        ctx.shadowBlur = 0;
     }
     ctx.globalAlpha = 1.0;
 
-    ctx.fillStyle = "#1e293b";
     for (let plat of activePlatforms) {
+        ctx.fillStyle = "#000000";
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        ctx.strokeStyle = "#334155";
+        
+        ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#00e5ff";
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
+        ctx.shadowBlur = 0;
     }
 
-    ctx.fillStyle = "#10b981";
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#10b981";
+    ctx.fillStyle = "#ff5500";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#ff5500";
     ctx.fillRect(activeLevel.goal.x, activeLevel.goal.y, activeLevel.goal.width, activeLevel.goal.height);
     ctx.shadowBlur = 0;
 
     if (player.isGrappling) {
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#00e5ff";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#00e5ff";
         ctx.beginPath();
         ctx.moveTo(player.x + player.width/2, player.y + player.height/2);
         ctx.lineTo(player.anchorX, player.anchorY);
         ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        ctx.fillStyle = "#f43f5e";
+        ctx.fillStyle = "#ff5500";
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#ff5500";
         ctx.beginPath();
-        ctx.arc(player.anchorX, player.anchorY, 4, 0, Math.PI * 2);
+        ctx.arc(player.anchorX, player.anchorY, 6, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
     }
 
     if (bikeImg.complete && bikeImg.naturalHeight !== 0) {
-        ctx.shadowBlur = player.isGrappling ? 15 : 5;
-        ctx.shadowColor = "#38bdf8";
-        ctx.drawImage(bikeImg, player.x, player.y, player.width, player.height);
-        ctx.shadowBlur = 0;
+        ctx.save();
+        if (player.vx < -0.1 || (keys.a && !keys.d)) {
+            ctx.translate(player.x + player.width, player.y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(bikeImg, 0, 0, player.width, player.height);
+        } else {
+            ctx.drawImage(bikeImg, player.x, player.y, player.width, player.height);
+        }
+        ctx.restore();
     } else {
-        ctx.fillStyle = player.isGrappling ? "#38bdf8" : "#818cf8";
-        ctx.shadowBlur = 10;
+        ctx.fillStyle = player.isGrappling ? "#00e5ff" : "#ffffff";
+        ctx.shadowBlur = 15;
         ctx.shadowColor = ctx.fillStyle;
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.shadowBlur = 0;
