@@ -84,22 +84,18 @@ const levelElement = document.getElementById("levelDisplay");
 const bestTimeElement = document.getElementById("bestTimeDisplay");
 const skipBtn = document.getElementById("skipBtn");
 
-// --- NEW ASSETS (BIKE & MUSIC) ---
 const bikeImg = new Image();
-bikeImg.src = 'bike.png'; // Make sure this exact file is in your folder!
+bikeImg.src = 'bike.png.png';
 
-const bgMusic = new Audio('music.mp3'); // Make sure this exact file is in your folder!
+const bgMusic = new Audio('music.mp3.mp3');
 bgMusic.loop = true;
-bgMusic.volume = 0.4; // 40% volume so it isn't deafening
+bgMusic.volume = 0.5;
 
-// Browsers block audio until the user interacts with the page.
-// This starts the music the very first time you click on the game.
 window.addEventListener("mousedown", () => {
     if (bgMusic.paused) {
-        bgMusic.play().catch(e => console.log("Audio waiting for interaction..."));
+        bgMusic.play().catch(e => console.log(e));
     }
 }, { once: true });
-// ---------------------------------
 
 let startTime = Date.now();
 let currentLevel = 0;
@@ -113,7 +109,6 @@ let shakeDuration = 0;
 const keys = { a: false, d: false, space: false };
 const mouse = { x: 0, y: 0, isDown: false };
 
-// Made the player slightly wider (30x20) so a motorcycle looks better!
 const player = {
     x: 50, y: 400, vx: 0, vy: 0, width: 30, height: 20,
     speed: 0.6, maxSpeed: 7, friction: 0.85, gravity: 0.45, jumpForce: 12,
@@ -126,7 +121,6 @@ function triggerShake(magnitude, duration) {
 }
 
 skipBtn.addEventListener("click", () => {
-    // If we skip the last level, loop back to 0
     if (currentLevel >= levels.length - 1) {
         loadLevel(0);
     } else {
@@ -247,7 +241,7 @@ async function initGame() {
         loadLevel(0);
         update();
     } catch (error) {
-        console.error("Failed to load levels:", error);
+        console.error(error);
     }
 }
 
@@ -383,7 +377,6 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw Particles
     for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
         p.x += p.vx;
@@ -399,7 +392,6 @@ function update() {
     }
     ctx.globalAlpha = 1.0;
 
-    // Draw Platforms
     ctx.fillStyle = "#1e293b";
     for (let plat of activePlatforms) {
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
@@ -408,14 +400,12 @@ function update() {
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
     }
 
-    // Draw Goal
     ctx.fillStyle = "#10b981";
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#10b981";
     ctx.fillRect(activeLevel.goal.x, activeLevel.goal.y, activeLevel.goal.width, activeLevel.goal.height);
     ctx.shadowBlur = 0;
 
-    // Draw Grapple Rope
     if (player.isGrappling) {
         ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2;
@@ -430,8 +420,6 @@ function update() {
         ctx.fill();
     }
 
-    // --- DRAW PLAYER (BIKE OR FALLBACK) ---
-    // If the image loaded successfully, draw it! Otherwise, draw the square.
     if (bikeImg.complete && bikeImg.naturalHeight !== 0) {
         ctx.shadowBlur = player.isGrappling ? 15 : 5;
         ctx.shadowColor = "#38bdf8";
@@ -444,7 +432,6 @@ function update() {
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.shadowBlur = 0;
     }
-    // --------------------------------------
 
     ctx.restore(); 
     requestAnimationFrame(update);
