@@ -9,7 +9,7 @@
 
         body {
             margin: 0;
-            background-color: #030613;
+            background-color: #050505;
             color: #e0e0e0;
             font-family: 'VT323', 'Courier New', monospace;
             display: flex;
@@ -26,8 +26,8 @@
             width: 900px;
             height: 500px;
             margin-top: 10px;
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.2);
-            border: 2px solid #00f3ff;
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+            border: 2px solid #00e5ff;
             border-radius: 4px;
         }
         #hud {
@@ -41,14 +41,14 @@
             letter-spacing: 2px;
         }
         .highlight { 
-            color: #00f3ff; 
+            color: #00e5ff; 
             font-weight: bold; 
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.6); 
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.6); 
         }
         .skip-btn {
-            background-color: #ff7a00;
+            background-color: #ff003c;
             color: #000;
-            border: 2px solid #ff7a00;
+            border: 2px solid #ff003c;
             padding: 5px 15px;
             font-family: 'VT323', 'Courier New', monospace;
             font-weight: bold;
@@ -57,25 +57,25 @@
             border-radius: 0;
             text-transform: uppercase;
             transition: all 0.2s;
-            box-shadow: 0 0 10px rgba(255, 122, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
         }
         .skip-btn:hover {
             background-color: #000;
-            color: #ff7a00;
-            box-shadow: 0 0 20px rgba(255, 122, 0, 0.9);
+            color: #ff003c;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.9);
         }
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            background-color: #030613;
+            background-color: #050505;
             touch-action: none; 
             image-rendering: pixelated;
         }
         .controls {
             margin-top: 15px;
             font-size: 1.2rem;
-            color: #00f3ff;
+            color: #00e5ff;
             text-align: center;
             line-height: 1.6;
             opacity: 0.7;
@@ -83,8 +83,8 @@
         #startScreen {
             position: absolute;
             inset: 0;
-            background-color: rgba(3, 6, 19, 0.85);
-            backdrop-filter: blur(5px);
+            background-color: rgba(5, 5, 5, 0.35);
+            backdrop-filter: blur(3px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -93,8 +93,8 @@
         }
         .title {
             font-size: 6rem;
-            color: #00f3ff;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 5px 5px 0px #ff7a00;
+            color: #00e5ff;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.8), 5px 5px 0px #ff003c;
             margin: 0 0 40px 0;
             letter-spacing: 5px;
         }
@@ -105,8 +105,8 @@
         }
         .menu-btn {
             background-color: #000;
-            color: #00f3ff;
-            border: 2px solid #00f3ff;
+            color: #00e5ff;
+            border: 2px solid #00e5ff;
             padding: 10px 40px;
             font-family: 'VT323', monospace;
             font-size: 2.5rem;
@@ -114,13 +114,13 @@
             text-transform: uppercase;
             transition: all 0.2s;
             width: 250px;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
         }
         .menu-btn:hover {
-            background-color: #ff7a00;
+            background-color: #ff003c;
             color: #fff;
-            border-color: #ff7a00;
-            box-shadow: 0 0 20px rgba(255, 122, 0, 0.8);
+            border-color: #ff003c;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.8);
             transform: scale(1.05);
         }
         #levelSelectUI {
@@ -136,8 +136,8 @@
         }
         .level-btn {
             background-color: #000;
-            color: #00f3ff;
-            border: 2px solid #00f3ff;
+            color: #00e5ff;
+            border: 2px solid #00e5ff;
             width: 60px;
             height: 60px;
             font-family: 'VT323', monospace;
@@ -146,20 +146,20 @@
             transition: all 0.2s;
         }
         .level-btn:hover {
-            background-color: #ff7a00;
+            background-color: #ff003c;
             color: #fff;
-            border-color: #ff7a00;
-            box-shadow: 0 0 15px #ff7a00;
+            border-color: #ff003c;
+            box-shadow: 0 0 15px #ff003c;
             transform: scale(1.1);
         }
         .credit {
             position: absolute;
             bottom: 15px;
             right: 20px;
-            color: #00f3ff;
+            color: #ff003c;
             font-size: 1.5rem;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            text-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
         }
     </style>
 </head>
@@ -222,6 +222,7 @@ bgMusic.volume = 0.4;
 
 let gameState = "menu";
 let startTime = Date.now();
+let timerStarted = false;
 let currentLevel = 0;
 let particles = [];
 let trail = [];
@@ -276,7 +277,7 @@ window.addEventListener("keydown", (e) => {
             player.isGrappling = false;
             player.vy -= player.jumpForce * 0.6;
             triggerShake(4, 5); 
-            spawnParticles(player.x + player.width/2, player.y + player.height/2, "#00f3ff", 8); 
+            spawnParticles(player.x + player.width/2, player.y + player.height/2, "#00e5ff", 8); 
         }
     }
 });
@@ -338,7 +339,7 @@ function attemptGrapple() {
             let dy = (player.y + player.height/2) - player.anchorY;
             player.ropeLength = Math.sqrt(dx * dx + dy * dy);
             triggerShake(2, 3);
-            spawnParticles(mouse.x, mouse.y, "#00f3ff", 10);
+            spawnParticles(mouse.x, mouse.y, "#00e5ff", 10);
             return;
         }
     }
@@ -376,7 +377,9 @@ function loadLevel(index) {
     player.isGrappling = false;
     particles = [];
     trail = [];
+    timerStarted = false;
     startTime = Date.now();
+    timerElement.innerText = "0.00";
     levelElement.innerText = currentLevel + 1;
     let bt = bestTimes[`level${currentLevel}`];
     bestTimeElement.innerText = bt ? bt : "--";
@@ -410,13 +413,13 @@ function update() {
     ctx.save();
     
     if (gameState === "complete") {
-        ctx.fillStyle = "#030613";
+        ctx.fillStyle = "#050505";
         ctx.fillRect(0, 0, 900, 500);
-        ctx.fillStyle = "#00f3ff";
+        ctx.fillStyle = "#00e5ff";
         ctx.font = "bold 64px VT323";
         ctx.textAlign = "center";
         ctx.fillText("SYSTEM OVERRIDDEN", 450, 220);
-        ctx.fillStyle = "#ff7a00";
+        ctx.fillStyle = "#ff003c";
         ctx.font = "32px VT323";
         ctx.fillText("ESCAPE SUCCESSFUL", 450, 280);
         ctx.fillStyle = "#ffffff";
@@ -440,7 +443,14 @@ function update() {
     let activePlatforms = [...activeLevel.platforms];
     
     if (gameState === "playing") {
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+        if (!timerStarted) {
+            if (keys.a || keys.d || keys.space || mouse.isDown) {
+                timerStarted = true;
+                startTime = Date.now();
+            }
+        }
+        
+        const elapsed = timerStarted ? ((Date.now() - startTime) / 1000).toFixed(2) : "0.00";
         timerElement.innerText = elapsed;
 
         if (!player.isGrappling) {
@@ -493,7 +503,7 @@ function update() {
                     player.grounded = true;
                     if (!previouslyGrounded && player.vy > 5) {
                         triggerShake(4, 5); 
-                        spawnParticles(player.x + player.width/2, player.y + player.height, "#ff7a00", 8);
+                        spawnParticles(player.x + player.width/2, player.y + player.height, "#ff003c", 8);
                     }
                     player.vy = 0;
                 } else if (player.vy < 0) {
@@ -506,7 +516,7 @@ function update() {
         if (keys.space && player.grounded && !player.isGrappling) {
             player.vy = -player.jumpForce;
             player.grounded = false;
-            spawnParticles(player.x + player.width/2, player.y + player.height, "#ff7a00", 5);
+            spawnParticles(player.x + player.width/2, player.y + player.height, "#ff003c", 5);
         }
 
         if (player.y > 900) {
@@ -533,7 +543,7 @@ function update() {
         }
     }
 
-    ctx.strokeStyle = "rgba(0, 243, 255, 0.04)";
+    ctx.strokeStyle = "rgba(0, 229, 255, 0.04)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     for(let i=0; i<900; i+=40) { ctx.moveTo(i,0); ctx.lineTo(i,500); }
@@ -558,24 +568,24 @@ function update() {
     ctx.globalAlpha = 1.0;
 
     for (let plat of activePlatforms) {
-        ctx.fillStyle = "#0a1128";
+        ctx.fillStyle = "#050505";
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        ctx.strokeStyle = "#00f3ff";
+        ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 2;
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
     }
 
-    ctx.fillStyle = "#ff7a00";
+    ctx.fillStyle = "#ff003c";
     ctx.fillRect(activeLevel.goal.x, activeLevel.goal.y, activeLevel.goal.width, activeLevel.goal.height);
 
     if (player.isGrappling) {
-        ctx.strokeStyle = "#00f3ff";
+        ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(player.x + player.width/2, player.y + player.height/2);
         ctx.lineTo(player.anchorX, player.anchorY);
         ctx.stroke();
-        ctx.fillStyle = "#ff7a00";
+        ctx.fillStyle = "#ff003c";
         ctx.beginPath();
         ctx.arc(player.anchorX, player.anchorY, 5, 0, Math.PI * 2);
         ctx.fill();
@@ -587,7 +597,7 @@ function update() {
         for (let i = 1; i < trail.length; i++) {
             ctx.lineTo(trail[i].x, trail[i].y);
         }
-        ctx.strokeStyle = "rgba(0, 243, 255, 0.4)";
+        ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
         ctx.lineWidth = 5;
         ctx.stroke();
     }
@@ -603,7 +613,7 @@ function update() {
         }
         ctx.restore();
     } else {
-        ctx.fillStyle = player.isGrappling ? "#00f3ff" : "#ffffff";
+        ctx.fillStyle = player.isGrappling ? "#00e5ff" : "#ffffff";
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
