@@ -20,25 +20,20 @@
             overflow: hidden;
             user-select: none; 
             -webkit-user-select: none;
-        }
-        #gameWrapper {
-            position: relative;
-            width: 900px;
-            height: 500px;
-            margin-top: 10px;
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
-            border: 2px solid #00e5ff;
-            border-radius: 4px;
+            touch-action: none;
         }
         #hud {
             display: none;
             justify-content: space-between;
             align-items: center;
-            width: 900px;
+            width: 100%;
+            max-width: 900px;
             margin-bottom: 5px;
             font-size: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 2px;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
         .highlight { 
             color: #00e5ff; 
@@ -64,6 +59,16 @@
             color: #ff003c;
             box-shadow: 0 0 20px rgba(255, 0, 60, 0.9);
         }
+        #gameWrapper {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 9 / 5;
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+            border: 2px solid #00e5ff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
         canvas {
             display: block;
             width: 100%;
@@ -71,14 +76,6 @@
             background-color: #050505;
             touch-action: none; 
             image-rendering: pixelated;
-        }
-        .controls {
-            margin-top: 15px;
-            font-size: 1.2rem;
-            color: #00e5ff;
-            text-align: center;
-            line-height: 1.6;
-            opacity: 0.7;
         }
         #startScreen {
             position: absolute;
@@ -97,11 +94,13 @@
             text-shadow: 0 0 20px rgba(0, 229, 255, 0.8), 5px 5px 0px #ff003c;
             margin: 0 0 40px 0;
             letter-spacing: 5px;
+            text-align: center;
         }
         #mainMenuControls {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+            align-items: center;
         }
         .menu-btn {
             background-color: #000;
@@ -113,7 +112,7 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.2s;
-            width: 250px;
+            width: 280px;
             box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
         }
         .menu-btn:hover {
@@ -122,6 +121,14 @@
             border-color: #ff003c;
             box-shadow: 0 0 20px rgba(255, 0, 60, 0.8);
             transform: scale(1.05);
+        }
+        #coffeeMsg {
+            display: none;
+            color: #ff003c;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+            margin-top: 10px;
+            text-align: center;
         }
         #levelSelectUI {
             display: none;
@@ -161,11 +168,62 @@
             letter-spacing: 2px;
             text-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
         }
+        .controls {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: #00e5ff;
+            text-align: center;
+            line-height: 1.6;
+            opacity: 0.7;
+        }
+        #mobileControls {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        .m-btn-group {
+            display: flex;
+            gap: 15px;
+        }
+        .m-btn {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #00e5ff;
+            border: 2px solid #00e5ff;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+        }
+        .m-btn:active {
+            background-color: #ff003c;
+            border-color: #ff003c;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .title { font-size: 3.5rem; margin-bottom: 20px; }
+            .menu-btn { width: 220px; font-size: 2rem; padding: 10px; }
+            #levelGrid { gap: 8px; }
+            .level-btn { width: 50px; height: 50px; font-size: 1.5rem; }
+            .controls { display: none !important; }
+            #mobileControls { display: flex; }
+            .credit { font-size: 1.2rem; bottom: 5px; right: 10px; }
+            #hud { font-size: 1.2rem; }
+            .skip-btn { padding: 5px 10px; font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
     <div id="hud">
-        <div>LEVEL: <span id="levelDisplay" class="highlight">1</span></div>
+        <div>LVL: <span id="levelDisplay" class="highlight">1</span></div>
         <div>BEST: <span id="bestTimeDisplay" class="highlight">--</span>S</div>
         <div>TIME: <span id="timer" class="highlight">0.00</span>S</div>
         <button id="skipBtn" class="skip-btn">SKIP</button>
@@ -179,6 +237,8 @@
             <div id="mainMenuControls">
                 <button id="startBtn" class="menu-btn">START</button>
                 <button id="levelsBtn" class="menu-btn">LEVELS</button>
+                <button id="coffeeBtn" class="menu-btn" style="font-size: 1.8rem;">BUY ME A COFFEE</button>
+                <div id="coffeeMsg">KEEP YOUR PENNIES, I'M ALREADY RICH.</div>
             </div>
 
             <div id="levelSelectUI">
@@ -194,6 +254,16 @@
         [A] / [D] : MOVE &nbsp;&nbsp;|&nbsp;&nbsp; [SPACE] : JUMP / CUT ROPE &nbsp;&nbsp;|&nbsp;&nbsp; [LEFT CLICK] : GRAPPLE
     </div>
 
+    <div id="mobileControls">
+        <div class="m-btn-group">
+            <div class="m-btn" id="mBtnLeft">◀</div>
+            <div class="m-btn" id="mBtnRight">▶</div>
+        </div>
+        <div class="m-btn-group">
+            <div class="m-btn" id="mBtnJump">▲</div>
+        </div>
+    </div>
+
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -206,12 +276,20 @@ const skipBtn = document.getElementById("skipBtn");
 const startScreen = document.getElementById("startScreen");
 const hud = document.getElementById("hud");
 const levelGrid = document.getElementById("levelGrid");
+const controls = document.getElementById("controls");
+const mobileControls = document.getElementById("mobileControls");
 
 const mainMenuControls = document.getElementById("mainMenuControls");
 const levelSelectUI = document.getElementById("levelSelectUI");
 const startBtn = document.getElementById("startBtn");
 const levelsBtn = document.getElementById("levelsBtn");
 const backBtn = document.getElementById("backBtn");
+const coffeeBtn = document.getElementById("coffeeBtn");
+const coffeeMsg = document.getElementById("coffeeMsg");
+
+const mBtnLeft = document.getElementById("mBtnLeft");
+const mBtnRight = document.getElementById("mBtnRight");
+const mBtnJump = document.getElementById("mBtnJump");
 
 const bikeImg = new Image();
 bikeImg.src = 'bike.png.png';
@@ -240,6 +318,12 @@ const player = {
     grounded: false, isGrappling: false, anchorX: 0, anchorY: 0, ropeLength: 0, swingAccel: 0.3
 };
 
+window.addEventListener("pointerdown", () => {
+    if (bgMusic.paused) {
+        bgMusic.play().catch(() => {});
+    }
+}, { once: true });
+
 startBtn.addEventListener("click", () => {
     startGame(0);
 });
@@ -252,6 +336,11 @@ levelsBtn.addEventListener("click", () => {
 backBtn.addEventListener("click", () => {
     levelSelectUI.style.display = "none";
     mainMenuControls.style.display = "flex";
+});
+
+coffeeBtn.addEventListener("click", () => {
+    coffeeBtn.style.display = "none";
+    coffeeMsg.style.display = "block";
 });
 
 function triggerShake(magnitude, duration) {
@@ -267,18 +356,22 @@ skipBtn.addEventListener("click", () => {
     }
 });
 
+function triggerJumpAction() {
+    keys.space = true;
+    if (player.isGrappling) {
+        player.isGrappling = false;
+        player.vy -= player.jumpForce * 0.6;
+        triggerShake(4, 5); 
+        spawnParticles(player.x + player.width/2, player.y + player.height/2, "#00e5ff", 8); 
+    }
+}
+
 window.addEventListener("keydown", (e) => {
     if (gameState !== "playing") return;
     if (e.key.toLowerCase() === "a") keys.a = true;
     if (e.key.toLowerCase() === "d") keys.d = true;
     if (e.key === " ") {
-        keys.space = true;
-        if (player.isGrappling) {
-            player.isGrappling = false;
-            player.vy -= player.jumpForce * 0.6;
-            triggerShake(4, 5); 
-            spawnParticles(player.x + player.width/2, player.y + player.height/2, "#00e5ff", 8); 
-        }
+        triggerJumpAction();
     }
 });
 
@@ -288,10 +381,21 @@ window.addEventListener("keyup", (e) => {
     if (e.key === " ") keys.space = false;
 });
 
-canvas.addEventListener("mousemove", (e) => {
+mBtnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); keys.a = true; });
+mBtnLeft.addEventListener("touchend", (e) => { e.preventDefault(); keys.a = false; });
+mBtnRight.addEventListener("touchstart", (e) => { e.preventDefault(); keys.d = true; });
+mBtnRight.addEventListener("touchend", (e) => { e.preventDefault(); keys.d = false; });
+mBtnJump.addEventListener("touchstart", (e) => { e.preventDefault(); triggerJumpAction(); });
+mBtnJump.addEventListener("touchend", (e) => { e.preventDefault(); keys.space = false; });
+
+function updateMousePos(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
+    mouse.x = (clientX - rect.left) * (canvas.width / rect.width);
+    mouse.y = (clientY - rect.top) * (canvas.height / rect.height);
+}
+
+canvas.addEventListener("mousemove", (e) => {
+    updateMousePos(e.clientX, e.clientY);
 });
 
 canvas.addEventListener("mousedown", (e) => {
@@ -301,17 +405,40 @@ canvas.addEventListener("mousedown", (e) => {
         return;
     }
     if (gameState === "playing" && e.button === 0) {
+        updateMousePos(e.clientX, e.clientY);
         mouse.isDown = true;
         attemptGrapple();
     }
 });
 
 window.addEventListener("mouseup", (e) => {
-    e.preventDefault();
     if (e.button === 0) {
         mouse.isDown = false;
         player.isGrappling = false;
     }
+});
+
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    if (gameState === "complete") {
+        returnToMenu();
+        return;
+    }
+    if (gameState === "playing") {
+        updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
+        mouse.isDown = true;
+        attemptGrapple();
+    }
+}, { passive: false });
+
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+
+window.addEventListener("touchend", () => {
+    mouse.isDown = false;
+    player.isGrappling = false;
 });
 
 function spawnParticles(x, y, color, count) {
@@ -346,11 +473,11 @@ function attemptGrapple() {
 }
 
 function startGame(index) {
-    if (bgMusic.paused) {
-        bgMusic.play().catch(() => {});
-    }
     startScreen.style.display = "none";
     hud.style.display = "flex";
+    if (window.innerWidth > 768) {
+        controls.style.display = "block";
+    }
     gameState = "playing";
     loadLevel(index);
 }
@@ -360,6 +487,7 @@ function returnToMenu() {
     mainMenuControls.style.display = "flex";
     levelSelectUI.style.display = "none";
     hud.style.display = "none";
+    controls.style.display = "none";
     gameState = "menu";
 }
 
@@ -378,7 +506,6 @@ function loadLevel(index) {
     particles = [];
     trail = [];
     timerStarted = false;
-    startTime = Date.now();
     timerElement.innerText = "0.00";
     levelElement.innerText = currentLevel + 1;
     let bt = bestTimes[`level${currentLevel}`];
