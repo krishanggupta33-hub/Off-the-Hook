@@ -45,7 +45,7 @@
         "platforms": [
             { "x": 0, "y": 450, "width": 150, "height": 50 },
             { "x": 750, "y": 450, "width": 150, "height": 50 }
-        ],
+        ],a
         "movingPlatforms": [
             { "x": 200, "y": 150, "width": 50, "height": 50, "rangeX": 450, "rangeY": 0, "speed": 0.001 }
         ]
