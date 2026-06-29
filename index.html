@@ -16,6 +16,9 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            /* Kills browser highlighting/dragging globally */
+            user-select: none; 
+            -webkit-user-select: none;
         }
         #hud {
             display: flex;
@@ -32,6 +35,8 @@
             border-radius: 4px;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
             background-color: #0b0f19;
+            /* Extra safety to lock the canvas */
+            touch-action: none; 
         }
         .controls {
             margin-top: 15px;
@@ -68,7 +73,6 @@ let particles = [];
 let levels = [];
 let bestTimes = JSON.parse(localStorage.getItem('neonTetherBestTimes')) || {};
 
-// Screen Shake Variables
 let shakeMagnitude = 0;
 let shakeDuration = 0;
 
@@ -113,14 +117,16 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mousedown", (e) => {
-    e.preventDefault(); // Fixes the browser drag-and-drop disconnect bug
+    e.preventDefault(); 
     if (e.button === 0) {
         mouse.isDown = true;
         attemptGrapple();
     }
 });
 
+// Added e.preventDefault() here as well to kill drag events completely
 window.addEventListener("mouseup", (e) => {
+    e.preventDefault();
     if (e.button === 0) {
         mouse.isDown = false;
         player.isGrappling = false;
@@ -208,7 +214,7 @@ function update() {
         return;
     }
 
-    ctx.save(); // Start camera manipulation for screen shake
+    ctx.save(); 
     if (shakeDuration > 0) {
         ctx.translate((Math.random() - 0.5) * shakeMagnitude, (Math.random() - 0.5) * shakeMagnitude);
         shakeDuration--;
@@ -297,7 +303,7 @@ function update() {
                 player.grounded = true;
                 
                 if (!previouslyGrounded && player.vy > 5) {
-                    triggerShake(4, 5); // Shake heavy on hard landings
+                    triggerShake(4, 5); 
                     spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 8);
                 }
                 
@@ -318,8 +324,9 @@ function update() {
         spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 5);
     }
 
-    if (player.y > canvas.height) {
-        triggerShake(10, 10); // Massive shake on death
+    // THE FIX: Increased the death boundary massively so huge swings don't kill you
+    if (player.y > canvas.height + 200) {
+        triggerShake(10, 10); 
         loadLevel(currentLevel); 
     }
     
@@ -383,7 +390,7 @@ function update() {
     ctx.fillRect(player.x, player.y, player.width, player.height);
     ctx.shadowBlur = 0;
 
-    ctx.restore(); // End camera manipulation
+    ctx.restore(); 
     requestAnimationFrame(update);
 }
 
