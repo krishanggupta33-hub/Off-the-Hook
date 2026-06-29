@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OFF THE HOOK - Tron Edition</title>
+    <title>Off The Hook</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
         body {
             margin: 0;
             background-color: #050505;
             color: #e0e0e0;
-            font-family: 'Consolas', monospace;
+            font-family: 'VT323', 'Courier New', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -19,27 +21,37 @@
             user-select: none; 
             -webkit-user-select: none;
         }
+        #gameWrapper {
+            position: relative;
+            width: 900px;
+            height: 500px;
+            margin-top: 10px;
+        }
         #hud {
-            display: flex;
+            display: none;
             justify-content: space-between;
             align-items: center;
             width: 900px;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+            margin-bottom: 5px;
+            font-size: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        .highlight { color: #00e5ff; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+        .highlight { 
+            color: #00e5ff; 
+            font-weight: bold; 
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); 
+        }
         .skip-btn {
             background-color: #ff5500;
             color: #000;
             border: 2px solid #ff5500;
             padding: 5px 15px;
-            font-family: 'Consolas', monospace;
+            font-family: 'VT323', 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 0;
             text-transform: uppercase;
             transition: all 0.2s;
             box-shadow: 0 0 10px rgba(255, 85, 0, 0.5);
@@ -50,44 +62,110 @@
             box-shadow: 0 0 20px rgba(255, 85, 0, 0.8);
         }
         canvas {
+            display: none;
+            width: 900px;
+            height: 500px;
             border: 2px solid #00e5ff;
-            border-radius: 4px;
             box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
             background-color: #000000;
             touch-action: none; 
             image-rendering: pixelated;
         }
         .controls {
+            display: none;
             margin-top: 15px;
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             color: #00e5ff;
             text-align: center;
             line-height: 1.6;
             opacity: 0.7;
         }
+        #startScreen {
+            position: absolute;
+            inset: 0;
+            background-color: #000000;
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .title {
+            font-size: 5rem;
+            color: #00e5ff;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.8), 4px 4px 0px #ff5500;
+            margin: 0 0 40px 0;
+            letter-spacing: 5px;
+        }
+        #levelGrid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .level-btn {
+            background-color: #000;
+            color: #00e5ff;
+            border: 2px solid #00e5ff;
+            width: 60px;
+            height: 60px;
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .level-btn:hover {
+            background-color: #00e5ff;
+            color: #000;
+            box-shadow: 0 0 15px #00e5ff;
+            transform: scale(1.1);
+        }
+        .credit {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: #ff5500;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(255, 85, 0, 0.5);
+        }
     </style>
 </head>
 <body>
     <div id="hud">
-        <div>Level: <span id="levelDisplay" class="highlight">1</span></div>
-        <div>Best Time: <span id="bestTimeDisplay" class="highlight">--</span>s</div>
-        <div>Time: <span id="timer" class="highlight">0.00</span>s</div>
-        <button id="skipBtn" class="skip-btn">Skip Level</button>
+        <div>LEVEL: <span id="levelDisplay" class="highlight">1</span></div>
+        <div>BEST: <span id="bestTimeDisplay" class="highlight">--</span>S</div>
+        <div>TIME: <span id="timer" class="highlight">0.00</span>S</div>
+        <button id="skipBtn" class="skip-btn">SKIP</button>
     </div>
     
-    <canvas id="gameCanvas" width="900" height="500"></canvas>
+    <div id="gameWrapper">
+        <canvas id="gameCanvas" width="450" height="250"></canvas>
+        <div id="startScreen">
+            <h1 class="title">OFF THE HOOK</h1>
+            <div id="levelGrid"></div>
+            <div class="credit">BY KRISHANG GUPTA</div>
+        </div>
+    </div>
     
-    <div class="controls">
-        [A] / [D] : Move &nbsp;&nbsp;|&nbsp;&nbsp; [SPACE] : Jump / Cut Rope &nbsp;&nbsp;|&nbsp;&nbsp; [LEFT CLICK] : Shoot Grapple
+    <div class="controls" id="controls">
+        [A] / [D] : MOVE &nbsp;&nbsp;|&nbsp;&nbsp; [SPACE] : JUMP / CUT ROPE &nbsp;&nbsp;|&nbsp;&nbsp; [LEFT CLICK] : GRAPPLE
     </div>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
 const timerElement = document.getElementById("timer");
 const levelElement = document.getElementById("levelDisplay");
 const bestTimeElement = document.getElementById("bestTimeDisplay");
 const skipBtn = document.getElementById("skipBtn");
+const startScreen = document.getElementById("startScreen");
+const hud = document.getElementById("hud");
+const controls = document.getElementById("controls");
+const levelGrid = document.getElementById("levelGrid");
 
 const bikeImg = new Image();
 bikeImg.src = 'bike.png.png';
@@ -96,18 +174,13 @@ const bgMusic = new Audio('music.mp3');
 bgMusic.loop = true;
 bgMusic.volume = 0.4;
 
-window.addEventListener("mousedown", () => {
-    if (bgMusic.paused) {
-        bgMusic.play().catch(() => {});
-    }
-}, { once: true });
-
+let gameState = "menu";
 let startTime = Date.now();
 let currentLevel = 0;
 let particles = [];
+let trail = [];
 let levels = [];
-let bestTimes = JSON.parse(localStorage.getItem('neonTetherBestTimes')) || {};
-let gameComplete = false;
+let bestTimes = JSON.parse(localStorage.getItem('offTheHookBestTimes')) || {};
 let shakeMagnitude = 0;
 let shakeDuration = 0;
 
@@ -127,13 +200,14 @@ function triggerShake(magnitude, duration) {
 
 skipBtn.addEventListener("click", () => {
     if (currentLevel >= levels.length - 1) {
-        gameComplete = true;
+        completeGame();
     } else {
         loadLevel(currentLevel + 1);
     }
 });
 
 window.addEventListener("keydown", (e) => {
+    if (gameState !== "playing") return;
     if (e.key.toLowerCase() === "a") keys.a = true;
     if (e.key.toLowerCase() === "d") keys.d = true;
     if (e.key === " ") {
@@ -161,12 +235,11 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mousedown", (e) => {
     e.preventDefault(); 
-    if (gameComplete) {
-        gameComplete = false;
-        loadLevel(0);
+    if (gameState === "complete") {
+        returnToMenu();
         return;
     }
-    if (e.button === 0) {
+    if (gameState === "playing" && e.button === 0) {
         mouse.isDown = true;
         attemptGrapple();
     }
@@ -193,25 +266,17 @@ function spawnParticles(x, y, color, count) {
 }
 
 function attemptGrapple() {
-    if (levels.length === 0 || gameComplete) return;
+    if (levels.length === 0 || gameState !== "playing") return;
     const activeLevel = levels[currentLevel];
-    let activePlatforms = [...activeLevel.platforms];
-    if (activeLevel.movingPlatforms) {
-        activePlatforms = activePlatforms.concat(activeLevel.movingPlatforms);
-    }
-    
-    for (let plat of activePlatforms) {
+    for (let plat of activeLevel.platforms) {
         if (mouse.x >= plat.x && mouse.x <= plat.x + plat.width &&
             mouse.y >= plat.y && mouse.y <= plat.y + plat.height) {
-            
             player.isGrappling = true;
             player.anchorX = mouse.x;
             player.anchorY = mouse.y;
-            
             let dx = (player.x + player.width/2) - player.anchorX;
             let dy = (player.y + player.height/2) - player.anchorY;
             player.ropeLength = Math.sqrt(dx * dx + dy * dy);
-            
             triggerShake(2, 3);
             spawnParticles(mouse.x, mouse.y, "#00e5ff", 10);
             return;
@@ -219,11 +284,31 @@ function attemptGrapple() {
     }
 }
 
-function loadLevel(index) {
-    if (index >= levels.length) {
-        gameComplete = true;
-        return;
+function startGame(index) {
+    if (bgMusic.paused) {
+        bgMusic.play().catch(() => {});
     }
+    startScreen.style.display = "none";
+    hud.style.display = "flex";
+    canvas.style.display = "block";
+    controls.style.display = "block";
+    gameState = "playing";
+    loadLevel(index);
+}
+
+function returnToMenu() {
+    startScreen.style.display = "flex";
+    hud.style.display = "none";
+    canvas.style.display = "none";
+    controls.style.display = "none";
+    gameState = "menu";
+}
+
+function completeGame() {
+    gameState = "complete";
+}
+
+function loadLevel(index) {
     currentLevel = index;
     const levelData = levels[currentLevel];
     player.x = levelData.spawn.x;
@@ -232,9 +317,9 @@ function loadLevel(index) {
     player.vy = 0;
     player.isGrappling = false;
     particles = [];
+    trail = [];
     startTime = Date.now();
     levelElement.innerText = currentLevel + 1;
-    
     let bt = bestTimes[`level${currentLevel}`];
     bestTimeElement.innerText = bt ? bt : "--";
 }
@@ -248,39 +333,46 @@ async function initGame() {
     try {
         const response = await fetch('levels.json?v=' + Date.now());
         levels = await response.json();
-        loadLevel(0);
-        update();
+        levels.forEach((_, i) => {
+            const btn = document.createElement("button");
+            btn.className = "level-btn";
+            btn.innerText = i + 1;
+            btn.onclick = () => startGame(i);
+            levelGrid.appendChild(btn);
+        });
+        requestAnimationFrame(update);
     } catch (error) {}
 }
 
 function update() {
-    if (levels.length === 0) {
-        requestAnimationFrame(update);
+    requestAnimationFrame(update);
+    
+    if (gameState === "menu") {
         return;
     }
 
-    if (gameComplete) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.scale(0.5, 0.5);
+
+    if (gameState === "complete") {
         ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+        ctx.fillRect(0, 0, 900, 500);
         ctx.fillStyle = "#00e5ff";
-        ctx.font = "bold 48px Consolas";
+        ctx.font = "bold 64px VT323";
         ctx.textAlign = "center";
-        ctx.fillText("SYSTEM OVERRIDDEN", canvas.width / 2, canvas.height / 2 - 20);
-        
+        ctx.fillText("SYSTEM OVERRIDDEN", 450, 220);
         ctx.fillStyle = "#ff5500";
-        ctx.font = "24px Consolas";
-        ctx.fillText("ESCAPE SUCCESSFUL", canvas.width / 2, canvas.height / 2 + 25);
-        
+        ctx.font = "32px VT323";
+        ctx.fillText("ESCAPE SUCCESSFUL", 450, 280);
         ctx.fillStyle = "#ffffff";
-        ctx.font = "16px Consolas";
-        ctx.fillText("Click anywhere to restart", canvas.width / 2, canvas.height / 2 + 80);
-        
-        requestAnimationFrame(update);
+        ctx.font = "24px VT323";
+        ctx.fillText("CLICK TO RETURN TO MENU", 450, 350);
+        ctx.restore();
         return;
     }
 
-    ctx.save(); 
     if (shakeDuration > 0) {
         ctx.translate((Math.random() - 0.5) * shakeMagnitude, (Math.random() - 0.5) * shakeMagnitude);
         shakeDuration--;
@@ -289,33 +381,8 @@ function update() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     timerElement.innerText = elapsed;
     const activeLevel = levels[currentLevel];
-
     let activePlatforms = [...activeLevel.platforms];
     
-    if (activeLevel.movingPlatforms) {
-        for (let mPlat of activeLevel.movingPlatforms) {
-            if (mPlat.baseX === undefined) {
-                mPlat.baseX = mPlat.x;
-                mPlat.baseY = mPlat.y;
-            }
-
-            let time = Date.now() * mPlat.speed;
-            mPlat.currentX = mPlat.baseX + Math.sin(time) * mPlat.rangeX;
-            mPlat.currentY = mPlat.baseY + Math.cos(time) * mPlat.rangeY;
-
-            mPlat.vx = mPlat.currentX - (mPlat.prevX || mPlat.baseX);
-            mPlat.vy = mPlat.currentY - (mPlat.prevY || mPlat.baseY);
-
-            mPlat.prevX = mPlat.currentX;
-            mPlat.prevY = mPlat.currentY;
-
-            mPlat.x = mPlat.currentX;
-            mPlat.y = mPlat.currentY;
-            
-            activePlatforms.push(mPlat);
-        }
-    }
-
     if (!player.isGrappling) {
         player.vy += player.gravity;
         if (keys.a) player.vx -= player.speed;
@@ -325,19 +392,16 @@ function update() {
         player.vy += player.gravity; 
         if (keys.a) player.vx -= player.swingAccel;
         if (keys.d) player.vx += player.swingAccel;
-        
         let nextX = player.x + player.vx;
         let nextY = player.y + player.vy;
         let dx = (nextX + player.width/2) - player.anchorX;
         let dy = (nextY + player.height/2) - player.anchorY;
         let currentDist = Math.sqrt(dx * dx + dy * dy);
-        
         if (currentDist > player.ropeLength) {
             let unitX = dx / currentDist;
             let unitY = dy / currentDist;
             player.x = player.anchorX + (unitX * player.ropeLength) - player.width/2;
             player.y = player.anchorY + (unitY * player.ropeLength) - player.height/2;
-            
             let velAlongNormal = player.vx * unitX + player.vy * unitY;
             if (velAlongNormal > 0) {
                 player.vx -= velAlongNormal * unitX;
@@ -348,8 +412,8 @@ function update() {
 
     player.vx = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.vx));
     player.vy = Math.max(-player.maxSpeed * 1.5, Math.min(player.maxSpeed * 1.5, player.vy));
-
     player.x += player.vx;
+    
     for (let plat of activePlatforms) {
         if (checkCollision(player, plat)) {
             if (player.vx > 0) player.x = plat.x - player.width;
@@ -367,16 +431,11 @@ function update() {
             if (player.vy > 0) {
                 player.y = plat.y - player.height;
                 player.grounded = true;
-                
                 if (!previouslyGrounded && player.vy > 5) {
                     triggerShake(4, 5); 
                     spawnParticles(player.x + player.width/2, player.y + player.height, "#ff5500", 8);
                 }
-                
                 player.vy = 0;
-                if (plat.vx) player.x += plat.vx;
-                if (plat.vy) player.y += plat.vy;
-                
             } else if (player.vy < 0) {
                 player.y = plat.y + plat.height;
                 player.vy = 0;
@@ -390,7 +449,7 @@ function update() {
         spawnParticles(player.x + player.width/2, player.y + player.height, "#ff5500", 5);
     }
 
-    if (player.y > canvas.height + 200) {
+    if (player.y > 900) {
         triggerShake(10, 10); 
         loadLevel(currentLevel); 
     }
@@ -399,18 +458,25 @@ function update() {
         let currentBest = bestTimes[`level${currentLevel}`];
         if (!currentBest || parseFloat(elapsed) < parseFloat(currentBest)) {
             bestTimes[`level${currentLevel}`] = elapsed;
-            localStorage.setItem('neonTetherBestTimes', JSON.stringify(bestTimes));
+            localStorage.setItem('offTheHookBestTimes', JSON.stringify(bestTimes));
         }
-        loadLevel(currentLevel + 1);
+        if (currentLevel >= levels.length - 1) {
+            completeGame();
+        } else {
+            loadLevel(currentLevel + 1);
+        }
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    trail.push({ x: player.x + player.width / 2, y: player.y + player.height / 2 });
+    if (trail.length > 25) {
+        trail.shift();
+    }
 
     ctx.strokeStyle = "rgba(0, 229, 255, 0.05)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for(let i=0; i<canvas.width; i+=40) { ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); }
-    for(let i=0; i<canvas.height; i+=40) { ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); }
+    for(let i=0; i<900; i+=40) { ctx.moveTo(i,0); ctx.lineTo(i,500); }
+    for(let i=0; i<500; i+=40) { ctx.moveTo(0,i); ctx.lineTo(900,i); }
     ctx.stroke();
 
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -424,49 +490,43 @@ function update() {
         }
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
-        ctx.fillRect(p.x, p.y, 4, 4);
-        ctx.shadowBlur = 0;
+        ctx.fillRect(p.x, p.y, 8, 8);
     }
     ctx.globalAlpha = 1.0;
 
     for (let plat of activePlatforms) {
         ctx.fillStyle = "#000000";
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        
         ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 2;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#00e5ff";
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
-        ctx.shadowBlur = 0;
     }
 
     ctx.fillStyle = "#ff5500";
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "#ff5500";
     ctx.fillRect(activeLevel.goal.x, activeLevel.goal.y, activeLevel.goal.width, activeLevel.goal.height);
-    ctx.shadowBlur = 0;
 
     if (player.isGrappling) {
         ctx.strokeStyle = "#00e5ff";
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#00e5ff";
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(player.x + player.width/2, player.y + player.height/2);
         ctx.lineTo(player.anchorX, player.anchorY);
         ctx.stroke();
-        ctx.shadowBlur = 0;
-
         ctx.fillStyle = "#ff5500";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#ff5500";
         ctx.beginPath();
         ctx.arc(player.anchorX, player.anchorY, 6, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
+    }
+
+    if (trail.length > 1) {
+        ctx.beginPath();
+        ctx.moveTo(trail[0].x, trail[0].y);
+        for (let i = 1; i < trail.length; i++) {
+            ctx.lineTo(trail[i].x, trail[i].y);
+        }
+        ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
+        ctx.lineWidth = 6;
+        ctx.stroke();
     }
 
     if (bikeImg.complete && bikeImg.naturalHeight !== 0) {
@@ -481,14 +541,10 @@ function update() {
         ctx.restore();
     } else {
         ctx.fillStyle = player.isGrappling ? "#00e5ff" : "#ffffff";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = ctx.fillStyle;
         ctx.fillRect(player.x, player.y, player.width, player.height);
-        ctx.shadowBlur = 0;
     }
 
     ctx.restore(); 
-    requestAnimationFrame(update);
 }
 
 initGame();
