@@ -68,6 +68,10 @@ let particles = [];
 let levels = [];
 let bestTimes = JSON.parse(localStorage.getItem('neonTetherBestTimes')) || {};
 
+// Screen Shake Variables
+let shakeMagnitude = 0;
+let shakeDuration = 0;
+
 const keys = { a: false, d: false, space: false };
 const mouse = { x: 0, y: 0, isDown: false };
 
@@ -77,6 +81,11 @@ const player = {
     grounded: false, isGrappling: false, anchorX: 0, anchorY: 0, ropeLength: 0, swingAccel: 0.3
 };
 
+function triggerShake(magnitude, duration) {
+    shakeMagnitude = magnitude;
+    shakeDuration = duration;
+}
+
 window.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "a") keys.a = true;
     if (e.key.toLowerCase() === "d") keys.d = true;
@@ -85,6 +94,7 @@ window.addEventListener("keydown", (e) => {
         if (player.isGrappling) {
             player.isGrappling = false;
             player.vy -= player.jumpForce * 0.6;
+            triggerShake(4, 5); 
             spawnParticles(player.x + 10, player.y + 10, "#ffffff", 8); 
         }
     }
@@ -103,6 +113,7 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mousedown", (e) => {
+    e.preventDefault(); // Fixes the browser drag-and-drop disconnect bug
     if (e.button === 0) {
         mouse.isDown = true;
         attemptGrapple();
@@ -148,6 +159,7 @@ function attemptGrapple() {
             let dy = (player.y + player.height/2) - player.anchorY;
             player.ropeLength = Math.sqrt(dx * dx + dy * dy);
             
+            triggerShake(2, 3);
             spawnParticles(mouse.x, mouse.y, "#38bdf8", 10);
             return;
         }
@@ -191,7 +203,16 @@ async function initGame() {
 }
 
 function update() {
-    if (levels.length === 0) return;
+    if (levels.length === 0) {
+        requestAnimationFrame(update);
+        return;
+    }
+
+    ctx.save(); // Start camera manipulation for screen shake
+    if (shakeDuration > 0) {
+        ctx.translate((Math.random() - 0.5) * shakeMagnitude, (Math.random() - 0.5) * shakeMagnitude);
+        shakeDuration--;
+    }
     
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     timerElement.innerText = elapsed;
@@ -265,15 +286,22 @@ function update() {
         }
     }
 
+    let previouslyGrounded = player.grounded;
     player.y += player.vy;
     player.grounded = false;
+    
     for (let plat of activePlatforms) {
         if (checkCollision(player, plat)) {
             if (player.vy > 0) {
                 player.y = plat.y - player.height;
                 player.grounded = true;
-                player.vy = 0;
                 
+                if (!previouslyGrounded && player.vy > 5) {
+                    triggerShake(4, 5); // Shake heavy on hard landings
+                    spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 8);
+                }
+                
+                player.vy = 0;
                 if (plat.vx) player.x += plat.vx;
                 if (plat.vy) player.y += plat.vy;
                 
@@ -290,7 +318,10 @@ function update() {
         spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 5);
     }
 
-    if (player.y > canvas.height) loadLevel(currentLevel); 
+    if (player.y > canvas.height) {
+        triggerShake(10, 10); // Massive shake on death
+        loadLevel(currentLevel); 
+    }
     
     if (checkCollision(player, activeLevel.goal)) {
         let currentBest = bestTimes[`level${currentLevel}`];
@@ -352,6 +383,7 @@ function update() {
     ctx.fillRect(player.x, player.y, player.width, player.height);
     ctx.shadowBlur = 0;
 
+    ctx.restore(); // End camera manipulation
     requestAnimationFrame(update);
 }
 
