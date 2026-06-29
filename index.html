@@ -16,13 +16,13 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            /* Kills browser highlighting/dragging globally */
             user-select: none; 
             -webkit-user-select: none;
         }
         #hud {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             width: 900px;
             margin-bottom: 10px;
             font-size: 1.2rem;
@@ -30,12 +30,27 @@
             letter-spacing: 2px;
         }
         .highlight { color: #38bdf8; font-weight: bold; }
+        .skip-btn {
+            background-color: #f43f5e;
+            color: #fff;
+            border: none;
+            padding: 5px 15px;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .skip-btn:hover {
+            background-color: #fb7185;
+        }
         canvas {
             border: 2px solid #334155;
             border-radius: 4px;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
             background-color: #0b0f19;
-            /* Extra safety to lock the canvas */
             touch-action: none; 
         }
         .controls {
@@ -52,6 +67,7 @@
         <div>Level: <span id="levelDisplay" class="highlight">1</span></div>
         <div>Best Time: <span id="bestTimeDisplay" class="highlight">--</span>s</div>
         <div>Time: <span id="timer" class="highlight">0.00</span>s</div>
+        <button id="skipBtn" class="skip-btn">Skip Level</button>
     </div>
     
     <canvas id="gameCanvas" width="900" height="500"></canvas>
@@ -66,6 +82,24 @@ const ctx = canvas.getContext("2d");
 const timerElement = document.getElementById("timer");
 const levelElement = document.getElementById("levelDisplay");
 const bestTimeElement = document.getElementById("bestTimeDisplay");
+const skipBtn = document.getElementById("skipBtn");
+
+// --- NEW ASSETS (BIKE & MUSIC) ---
+const bikeImg = new Image();
+bikeImg.src = 'bike.png'; // Make sure this exact file is in your folder!
+
+const bgMusic = new Audio('music.mp3'); // Make sure this exact file is in your folder!
+bgMusic.loop = true;
+bgMusic.volume = 0.4; // 40% volume so it isn't deafening
+
+// Browsers block audio until the user interacts with the page.
+// This starts the music the very first time you click on the game.
+window.addEventListener("mousedown", () => {
+    if (bgMusic.paused) {
+        bgMusic.play().catch(e => console.log("Audio waiting for interaction..."));
+    }
+}, { once: true });
+// ---------------------------------
 
 let startTime = Date.now();
 let currentLevel = 0;
@@ -79,8 +113,9 @@ let shakeDuration = 0;
 const keys = { a: false, d: false, space: false };
 const mouse = { x: 0, y: 0, isDown: false };
 
+// Made the player slightly wider (30x20) so a motorcycle looks better!
 const player = {
-    x: 50, y: 400, vx: 0, vy: 0, width: 20, height: 20,
+    x: 50, y: 400, vx: 0, vy: 0, width: 30, height: 20,
     speed: 0.6, maxSpeed: 7, friction: 0.85, gravity: 0.45, jumpForce: 12,
     grounded: false, isGrappling: false, anchorX: 0, anchorY: 0, ropeLength: 0, swingAccel: 0.3
 };
@@ -89,6 +124,15 @@ function triggerShake(magnitude, duration) {
     shakeMagnitude = magnitude;
     shakeDuration = duration;
 }
+
+skipBtn.addEventListener("click", () => {
+    // If we skip the last level, loop back to 0
+    if (currentLevel >= levels.length - 1) {
+        loadLevel(0);
+    } else {
+        loadLevel(currentLevel + 1);
+    }
+});
 
 window.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "a") keys.a = true;
@@ -99,7 +143,7 @@ window.addEventListener("keydown", (e) => {
             player.isGrappling = false;
             player.vy -= player.jumpForce * 0.6;
             triggerShake(4, 5); 
-            spawnParticles(player.x + 10, player.y + 10, "#ffffff", 8); 
+            spawnParticles(player.x + 15, player.y + 10, "#ffffff", 8); 
         }
     }
 });
@@ -124,7 +168,6 @@ canvas.addEventListener("mousedown", (e) => {
     }
 });
 
-// Added e.preventDefault() here as well to kill drag events completely
 window.addEventListener("mouseup", (e) => {
     e.preventDefault();
     if (e.button === 0) {
@@ -304,7 +347,7 @@ function update() {
                 
                 if (!previouslyGrounded && player.vy > 5) {
                     triggerShake(4, 5); 
-                    spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 8);
+                    spawnParticles(player.x + 15, player.y + 20, "#cbd5e1", 8);
                 }
                 
                 player.vy = 0;
@@ -321,10 +364,9 @@ function update() {
     if (keys.space && player.grounded && !player.isGrappling) {
         player.vy = -player.jumpForce;
         player.grounded = false;
-        spawnParticles(player.x + 10, player.y + 20, "#cbd5e1", 5);
+        spawnParticles(player.x + 15, player.y + 20, "#cbd5e1", 5);
     }
 
-    // THE FIX: Increased the death boundary massively so huge swings don't kill you
     if (player.y > canvas.height + 200) {
         triggerShake(10, 10); 
         loadLevel(currentLevel); 
@@ -341,6 +383,7 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw Particles
     for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
         p.x += p.vx;
@@ -356,6 +399,7 @@ function update() {
     }
     ctx.globalAlpha = 1.0;
 
+    // Draw Platforms
     ctx.fillStyle = "#1e293b";
     for (let plat of activePlatforms) {
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
@@ -364,12 +408,14 @@ function update() {
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
     }
 
+    // Draw Goal
     ctx.fillStyle = "#10b981";
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#10b981";
     ctx.fillRect(activeLevel.goal.x, activeLevel.goal.y, activeLevel.goal.width, activeLevel.goal.height);
     ctx.shadowBlur = 0;
 
+    // Draw Grapple Rope
     if (player.isGrappling) {
         ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2;
@@ -384,11 +430,21 @@ function update() {
         ctx.fill();
     }
 
-    ctx.fillStyle = player.isGrappling ? "#38bdf8" : "#818cf8";
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = ctx.fillStyle;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-    ctx.shadowBlur = 0;
+    // --- DRAW PLAYER (BIKE OR FALLBACK) ---
+    // If the image loaded successfully, draw it! Otherwise, draw the square.
+    if (bikeImg.complete && bikeImg.naturalHeight !== 0) {
+        ctx.shadowBlur = player.isGrappling ? 15 : 5;
+        ctx.shadowColor = "#38bdf8";
+        ctx.drawImage(bikeImg, player.x, player.y, player.width, player.height);
+        ctx.shadowBlur = 0;
+    } else {
+        ctx.fillStyle = player.isGrappling ? "#38bdf8" : "#818cf8";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.shadowBlur = 0;
+    }
+    // --------------------------------------
 
     ctx.restore(); 
     requestAnimationFrame(update);
