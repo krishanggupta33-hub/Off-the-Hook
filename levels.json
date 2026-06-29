@@ -24,11 +24,9 @@
         "goal": { "x": 820, "y": 100, "width": 40, "height": 40 },
         "platforms": [
             { "x": 0, "y": 450, "width": 120, "height": 50 },
+            { "x": 300, "y": 150, "width": 40, "height": 40 },
+            { "x": 550, "y": 150, "width": 40, "height": 40 },
             { "x": 780, "y": 150, "width": 120, "height": 50 }
-        ],
-        "movingPlatforms": [
-            { "x": 200, "y": 250, "width": 100, "height": 20, "rangeX": 0, "rangeY": 150, "speed": 0.0008 },
-            { "x": 400, "y": 200, "width": 100, "height": 20, "rangeX": 250, "rangeY": 0, "speed": 0.0005 }
         ]
     }
 ]
