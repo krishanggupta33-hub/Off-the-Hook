@@ -1,5 +1,4 @@
-[
-    {
+{
         "spawn": { "x": 50, "y": 400 },
         "goal": { "x": 820, "y": 410, "width": 40, "height": 40 },
         "platforms": [
@@ -44,10 +43,17 @@
         "goal": { "x": 820, "y": 410, "width": 40, "height": 40 },
         "platforms": [
             { "x": 0, "y": 450, "width": 150, "height": 50 },
+            { "x": 300, "y": 250, "width": 60, "height": 60 },
+            { "x": 550, "y": 250, "width": 60, "height": 60 },
             { "x": 750, "y": 450, "width": 150, "height": 50 }
-        ],a
-        "movingPlatforms": [
-            { "x": 200, "y": 150, "width": 50, "height": 50, "rangeX": 450, "rangeY": 0, "speed": 0.001 }
         ]
-    }
-]
+    },
+    {
+        "spawn": { "x": 50, "y": 400 },
+        "goal": { "x": 820, "y": 410, "width": 40, "height": 40 },
+        "platforms": [
+            { "x": 0, "y": 450, "width": 200, "height": 50 },
+            { "x": 400, "y": 250, "width": 50, "height": 250 },
+            { "x": 400, "y": 50, "width": 50, "height": 50 },
+            { "x": 700, "y": 450, "width": 200, "height": 50 }
+        ]
