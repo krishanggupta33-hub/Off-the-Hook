@@ -73,7 +73,7 @@ const mouse = { x: 0, y: 0, isDown: false };
 
 const player = {
     x: 50, y: 400, vx: 0, vy: 0, width: 20, height: 20,
-    speed: 0.6, maxSpeed: 7, friction: 0.85, gravity: 0.45, jumpForce: 9.5,
+    speed: 0.6, maxSpeed: 7, friction: 0.85, gravity: 0.45, jumpForce: 12,
     grounded: false, isGrappling: false, anchorX: 0, anchorY: 0, ropeLength: 0, swingAccel: 0.3
 };
 
@@ -82,7 +82,11 @@ window.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "d") keys.d = true;
     if (e.key === " ") {
         keys.space = true;
-        if (player.isGrappling) player.isGrappling = false;
+        if (player.isGrappling) {
+            player.isGrappling = false;
+            player.vy -= player.jumpForce * 0.6;
+            spawnParticles(player.x + 10, player.y + 10, "#ffffff", 8); 
+        }
     }
 });
 
@@ -125,6 +129,7 @@ function spawnParticles(x, y, color, count) {
 }
 
 function attemptGrapple() {
+    if (levels.length === 0) return;
     const activeLevel = levels[currentLevel];
     let activePlatforms = [...activeLevel.platforms];
     if (activeLevel.movingPlatforms) {
@@ -176,7 +181,7 @@ function checkCollision(p, plat) {
 
 async function initGame() {
     try {
-        const response = await fetch('levels.json');
+        const response = await fetch('levels.json?v=' + Date.now());
         levels = await response.json();
         loadLevel(0);
         update();
@@ -186,6 +191,8 @@ async function initGame() {
 }
 
 function update() {
+    if (levels.length === 0) return;
+    
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     timerElement.innerText = elapsed;
     const activeLevel = levels[currentLevel];
@@ -194,15 +201,20 @@ function update() {
     
     if (activeLevel.movingPlatforms) {
         for (let mPlat of activeLevel.movingPlatforms) {
-            let oldX = mPlat.currentX || mPlat.x;
-            let oldY = mPlat.currentY || mPlat.y;
+            if (mPlat.baseX === undefined) {
+                mPlat.baseX = mPlat.x;
+                mPlat.baseY = mPlat.y;
+            }
 
             let time = Date.now() * mPlat.speed;
-            mPlat.currentX = mPlat.x + Math.sin(time) * mPlat.rangeX;
-            mPlat.currentY = mPlat.y + Math.cos(time) * mPlat.rangeY;
+            mPlat.currentX = mPlat.baseX + Math.sin(time) * mPlat.rangeX;
+            mPlat.currentY = mPlat.baseY + Math.cos(time) * mPlat.rangeY;
 
-            mPlat.vx = mPlat.currentX - oldX;
-            mPlat.vy = mPlat.currentY - oldY;
+            mPlat.vx = mPlat.currentX - (mPlat.prevX || mPlat.baseX);
+            mPlat.vy = mPlat.currentY - (mPlat.prevY || mPlat.baseY);
+
+            mPlat.prevX = mPlat.currentX;
+            mPlat.prevY = mPlat.currentY;
 
             mPlat.x = mPlat.currentX;
             mPlat.y = mPlat.currentY;
