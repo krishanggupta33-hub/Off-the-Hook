@@ -37,3 +37,8 @@ Mobile
 [ ▲ ] : Jump / Cut Rope
 
 [ TAP SCREEN ] : Shoot Grapple (Hold to swing)
+
+
+AI USAGE
+
+AI used for debbuging and publishing.
