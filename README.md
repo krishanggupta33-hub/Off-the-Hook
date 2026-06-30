@@ -19,7 +19,7 @@ Features
 Controls
 
 
-Desktop
+Desktop (Recommended)
 
 
 [ A ] / [ D ] : Move Left / Right
